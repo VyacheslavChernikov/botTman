@@ -1,11 +1,12 @@
 import os
+from dotenv import load_dotenv
 from dataclasses import dataclass
+
+load_dotenv()  # загружаем переменные из .env файла
 
 @dataclass
 class Config:
-    # Токен из переменной окружения
-    BOT_TOKEN: str = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN')
-    
+    BOT_TOKEN: str = os.getenv('BOT_TOKEN')
     # Настройки игры
     GAME_DURATION: int = 60  # секунды
     EASY_MODE_INTERVAL: float = 2.0  # секунды

@@ -11,16 +11,18 @@ dp = Dispatcher(bot, storage=storage)
 
 active_games = {}
 
-@dp.message_handler(commands=['start'])
-async def start_command(message: types.Message):
+def get_main_keyboard() -> types.InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
         types.InlineKeyboardButton("Начать миссию", callback_data="start_game"),
         types.InlineKeyboardButton("Магазин", callback_data="shop"),
         types.InlineKeyboardButton("Баланс", callback_data="balance")
     )
-    
-    await message.answer("Добро пожаловать в T-MAN Game!", reply_markup=keyboard)
+    return keyboard
+
+@dp.message_handler(commands=['start'])
+async def start_command(message: types.Message):
+    await message.answer("Добро пожаловать в T-MAN Game!", reply_markup=get_main_keyboard())
 
 @dp.callback_query_handler(lambda c: c.data == 'start_game')
 async def start_game(callback_query: types.CallbackQuery):
@@ -83,6 +85,8 @@ async def game_loop(message: types.Message, game: GameSession):
         f"Ваш счёт: {game.score}\n"
         f"Заработано токенов: {game.tokens_earned}"
     )
+    
+    await message.answer("Выберите действие:", reply_markup=get_main_keyboard())
 
 @dp.callback_query_handler(lambda c: c.data.startswith('tap_'))
 async def process_tap(callback_query: types.CallbackQuery):

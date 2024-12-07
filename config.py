@@ -21,5 +21,7 @@ class Config:
     QUICK_BRUSH_PRICE: int = 50
     EXTRA_TIME_PRICE: int = 75
     CARD_SCANNER_PRICE: int = 100
+    
+    WEBAPP_URL: str = os.getenv('WEBAPP_URL', 'https://your-domain.com')
 
 config = Config() 

@@ -4,12 +4,30 @@ from config import config
 from database.models import Session, User, Game
 from game.game_logic import GameSession
 import asyncio
+from aiohttp import web
+import json
 
 bot = Bot(token=config.BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 active_games = {}
+
+routes = web.RouteTableDef()
+
+@routes.get('/')
+async def handle_webapp(request):
+    return web.FileResponse('./webapp/index.html')
+
+@routes.post('/webhook')
+async def handle_webhook(request):
+    data = await request.json()
+    if data.get('action') == 'gameEnd':
+        user_id = data.get('user_id')
+        score = data.get('score')
+        # Обработка результатов игры
+        await process_game_results(user_id, score)
+    return web.Response(text='OK')
 
 def get_main_keyboard() -> types.InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
@@ -133,5 +151,11 @@ async def balance_handler(callback_query: types.CallbackQuery):
     session.close()
 
 if __name__ == '__main__':
-    from aiogram import executor
+    app = web.Application()
+    app.add_routes(routes)
+    app.router.add_static('/static', './webapp')
+    
+    # Запускаем бота и веб-сервер
+    loop = asyncio.get_event_loop()
+    loop.create_task(web._run_app(app, host='0.0.0.0', port=8080))
     executor.start_polling(dp, skip_updates=True) 
